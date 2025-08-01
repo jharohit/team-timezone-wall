@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en"> 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcelestial Clock</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@latest/dist/full.css" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px; 
+            box-sizing: border-box;
+            background-color: #FFFFFF; /* Explicitly set body background to white */
+        }
+        .clocksContainerWrapper {
+            width: 100%;
+            padding-bottom: 1rem; 
+            margin-top: 1.5rem; 
+        }
+        .clock-card-custom {
+            width: 260px; 
+            min-height: 155px; 
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out, background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .clock-card-custom:hover {
+            transform: translateY(-3px); 
+        }
+        .time {
+            font-size: 2.25rem; 
+            font-weight: 600;
+            line-height: 1;
+        }
+        .date {
+            font-size: 0.8rem; 
+        }
+        .city-name {
+            font-size: 1rem; 
+            font-weight: 500;
+        }
+        .timezone-info { 
+            font-size: 0.7rem; 
+            opacity: 0.7; /* This might be overridden by text-accent-content, which is fine */
+            line-height: 1.2; 
+        }
+        .alert-custom-pos {
+            position: fixed;
+            top: 10px; 
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            z-index: 1020; 
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+            min-width: 280px; 
+        }
+        .alert-custom-pos.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .select option { 
+            background-color: hsl(var(--b1)); 
+            color: hsl(var(--bc)); 
+        }
+        
+        .top-right-controls {
+            position: absolute;
+            top: 10px; 
+            right: 10px; 
+            z-index: 1010; 
+            display: flex;
+            gap: 0.5rem; 
+        }
+
+        .add-city-dropdown-content {
+            width: 280px; 
+            padding: 1rem; 
+        }
+        .add-city-dropdown-content .form-control {
+            margin-bottom: 0.75rem; 
+        }
+        .add-city-dropdown-content .btn {
+            margin-top: 0.5rem; 
+        }
+
+        /* Removed .working-hours-active CSS as it's now handled by DaisyUI classes directly */
+
+        @media (max-width: 767px) { 
+             .clock-card-custom {
+                width: 100%; 
+                max-width: 300px; 
+            }
+            .time { font-size: 2rem; }
+            .city-name { font-size: 0.95rem; }
+            #timeControlsContainer {
+                padding: 0.75rem; 
+            }
+        }
+         @media (max-width: 480px) { 
+            .clocksContainerWrapper {
+                margin-top: 3.5rem; 
+            }
+            #timeControlsContainer .form-control, #timeControlsContainer .text-center {
+                 width: 100%;
+            }
+             #timeControlsContainer .btn {
+                 width: auto; 
+            }
+         }
+    </style>
+</head>
+<body>
+    <div class="top-right-controls">
+        <div class="dropdown dropdown-end">
+            <button tabindex="0" role="button" class="btn btn-ghost btn-xs sm:btn-sm btn-circle" aria-label="Add City">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                </svg>
+            </button>
+            <div tabindex="0" class="dropdown-content z-[1] menu p-4 shadow bg-base-100 rounded-box w-72 add-city-dropdown-content">
+                <h3 class="text-lg font-semibold mb-3">Add New Clock</h3>
+                <div class="form-control">
+                    <label class="label py-0.5 sm:py-1" for="customCityName"><span class="label-text text-xs">City Name (Optional)</span></label>
+                    <input type="text" id="customCityName" placeholder="e.g., Paris" class="input input-xs sm:input-sm input-bordered input-primary w-full">
+                </div>
+                <div class="form-control">
+                    <label class="label py-0.5 sm:py-1" for="timezoneSelect"><span class="label-text text-xs">Timezone</span></label>
+                    <select id="timezoneSelect" class="select select-xs sm:select-sm select-bordered select-primary w-full">
+                        </select>
+                </div>
+                <button id="addTimezoneBtn" class="btn btn-secondary btn-xs sm:btn-sm w-full">Add Clock</button> 
+            </div>
+        </div>
+
+        <label class="swap swap-rotate btn btn-ghost btn-xs sm:btn-sm btn-circle" aria-label="Toggle Theme"> 
+            <input type="checkbox" id="themeToggleCheckbox" />
+            <svg class="swap-on fill-current w-5 h-5 sm:w-6 sm:h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0,-1.41-1.41l-.71.71A1,1,0,0,0,5.64,7.05ZM12,15a3,3,0,1,0,3-3A3,3,0,0,0,12,15Zm12.71,1.29a1,1,0,0,0-.71.29,1,1,0,0,0,0,1.41l.71.71a1,1,0,0,0,1.41,0,1,1,0,0,0,0-1.41ZM20,12a1,1,0,0,0-1-1H19a1,1,0,0,0,0,2h1A1,1,0,0,0,20,12ZM18.36,7.05a1,1,0,0,0-.7-.29,1,1,0,0,0-.71.29l-.71.71a1,1,0,1,0,1.41,1.41l.71-.71A1,1,0,0,0,18.36,7.05ZM12,9a1,1,0,0,0,1-1V7a1,1,0,0,0-2,0V8A1,1,0,0,0,12,9Z"/></svg>
+            <svg class="swap-off fill-current w-5 h-5 sm:w-6 sm:h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22a10.14,10.14,0,0,0,9.56,15.7A8.12,8.12,0,0,1,12.14,19.73Z"/></svg>
+        </label>
+    </div>
+
+    <div class="clocksContainerWrapper">
+        <div id="clocksContainer" class="flex flex-wrap justify-center gap-3 w-full"> 
+            </div>
+    </div>
+
+    <div id="timeControlsContainer" class="w-full max-w-md mx-auto my-6 p-3 bg-base-200 rounded-box shadow-lg">
+        <div class="form-control flex-grow">
+            <label for="timeTravelSlider" class="label py-0.5">
+                <span class="label-text text-xs sm:text-sm">Time Travel: <span id="timeTravelValue" class="font-semibold">0 hours</span></span>
+            </label>
+            <input type="range" id="timeTravelSlider" min="-24" max="24" value="0" step="0.5" class="range range-primary range-xs sm:range-sm"> 
+        </div>
+        <div class="text-center mt-3">
+            <button id="resetTimeBtn" class="btn btn-primary btn-xs sm:btn-sm">Set to Now</button>
+        </div>
+    </div>
+
+
+    <div id="messageBoxContainer" class="alert-custom-pos"> 
+        <div role="alert" id="messageBoxAlert" class="alert alert-sm sm:alert-md py-2 px-3"> 
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-4 h-4 sm:w-5 sm:h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span id="messageText" class="text-xs sm:text-sm"></span>
+        </div>
+    </div>
+
+    <script>
+        // --- Theme Management ---
+        const themeToggleCheckbox = document.getElementById('themeToggleCheckbox');
+        const htmlElement = document.documentElement;
+        const lightTheme = 'cupcake'; 
+        const darkTheme = 'night'; 
+
+        function applyTheme(theme) {
+            htmlElement.setAttribute('data-theme', theme);
+            themeToggleCheckbox.checked = theme === lightTheme;
+        }
+
+        function toggleTheme() {
+            const newTheme = themeToggleCheckbox.checked ? lightTheme : darkTheme;
+            applyTheme(newTheme);
+            localStorage.setItem('transcelestialTheme', newTheme);
+        }
+
+        themeToggleCheckbox.addEventListener('change', toggleTheme);
+        const savedTheme = localStorage.getItem('transcelestialTheme') || lightTheme; 
+        applyTheme(savedTheme);
+
+        // --- DOM Elements ---
+        const clocksContainer = document.getElementById('clocksContainer');
+        const timeTravelSlider = document.getElementById('timeTravelSlider');
+        const timeTravelValueDisplay = document.getElementById('timeTravelValue');
+        const resetTimeBtn = document.getElementById('resetTimeBtn');
+        
+        const timezoneSelect = document.getElementById('timezoneSelect'); 
+        const customCityNameInput = document.getElementById('customCityName'); 
+        const addTimezoneBtn = document.getElementById('addTimezoneBtn'); 
+        
+        const messageBoxContainer = document.getElementById('messageBoxContainer');
+        const messageBoxAlert = document.getElementById('messageBoxAlert');
+        const messageText = document.getElementById('messageText');
+
+        // --- State ---
+        let timeOffsetHours = 0;
+        let intervalId;
+        let messageTimeout;
+
+        const WORK_HOUR_START = 8; 
+        const WORK_HOUR_END = 18; 
+
+
+        let displayedTimezones = [
+            { city: "My Local Time", timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, isLocal: true },
+            { city: "Singapore", timezone: "Asia/Singapore" },
+            { city: "Mumbai", timezone: "Asia/Kolkata" },
+            { city: "Manila", timezone: "Asia/Manila" },
+            { city: "Jakarta", timezone: "Asia/Jakarta" },
+            { city: "Darwin", timezone: "Australia/Darwin" },
+            { city: "San Francisco", timezone: "America/Los_Angeles" },
+            { city: "Grand Rapids", timezone: "America/Detroit" },
+            { city: "Cape Town", timezone: "Africa/Johannesburg" },
+            { city: "Tokyo", timezone: "Asia/Tokyo" },
+        ];
+
+        const allTimezones = [
+            "Africa/Abidjan", "Africa/Accra", "Africa/Algiers", "Africa/Cairo", "Africa/Casablanca", "Africa/Johannesburg", "Africa/Lagos", "Africa/Nairobi",
+            "America/Adak", "America/Anchorage", "America/Argentina/Buenos_Aires", "America/Asuncion", "America/Atikokan", "America/Bogota", "America/Caracas", "America/Chicago", "America/Denver", "America/Detroit","America/Edmonton", "America/Halifax", "America/Havana", "America/Indiana/Indianapolis", "America/Jamaica", "America/La_Paz", "America/Lima", "America/Los_Angeles", "America/Manaus", "America/Mexico_City", "America/Montevideo", "America/New_York", "America/Phoenix", "America/Santiago", "America/Sao_Paulo", "America/St_Johns", "America/Toronto", "America/Vancouver",
+            "Antarctica/Casey", "Antarctica/Davis", "Antarctica/Mawson", "Antarctica/Palmer", "Antarctica/Rothera", "Antarctica/Syowa", "Antarctica/Troll", "Antarctica/Vostok",
+            "Asia/Almaty", "Asia/Amman", "Asia/Anadyr", "Asia/Baghdad", "Asia/Bangkok", "Asia/Beirut", "Asia/Colombo", "Asia/Damascus", "Asia/Dhaka", "Asia/Dubai", "Asia/Ho_Chi_Minh", "Asia/Hong_Kong", "Asia/Istanbul", "Asia/Jakarta", "Asia/Jayapura", "Asia/Jerusalem", "Asia/Kabul", "Asia/Karachi", "Asia/Kathmandu", "Asia/Kolkata", "Asia/Kuala_Lumpur", "Asia/Kuwait", "Asia/Macau", "Asia/Manila", "Asia/Pyongyang", "Asia/Qatar", "Asia/Riyadh", "Asia/Seoul", "Asia/Shanghai", "Asia/Singapore", "Asia/Taipei", "Asia/Tashkent", "Asia/Tehran", "Asia/Tokyo", "Asia/Ulaanbaatar", "Asia/Yangon", "Asia/Yekaterinburg", "Asia/Yerevan",
+            "Atlantic/Azores", "Atlantic/Bermuda", "Atlantic/Canary", "Atlantic/Cape_Verde", "Atlantic/Faroe", "Atlantic/Madeira", "Atlantic/Reykjavik", "Atlantic/South_Georgia", "Atlantic/Stanley",
+            "Australia/Adelaide", "Australia/Brisbane", "Australia/Broken_Hill", "Australia/Darwin", "Australia/Eucla", "Australia/Hobart", "Australia/Lindeman", "Australia/Lord_Howe", "Australia/Melbourne", "Australia/Perth", "Australia/Sydney",
+            "Europe/Amsterdam", "Europe/Andorra", "Europe/Athens", "Europe/Belgrade", "Europe/Berlin", "Europe/Bratislava", "Europe/Brussels", "Europe/Bucharest", "Europe/Budapest", "Europe/Chisinau", "Europe/Copenhagen", "Europe/Dublin", "Europe/Gibraltar", "Europe/Helsinki", "Europe/Istanbul", "Europe/Kaliningrad", "Europe/Kiev", "Europe/Lisbon", "Europe/London", "Europe/Luxembourg", "Europe/Madrid", "Europe/Malta", "Europe/Minsk", "Europe/Monaco", "Europe/Moscow", "Europe/Oslo", "Europe/Paris", "Europe/Prague", "Europe/Riga", "Europe/Rome", "Europe/Samara", "Europe/Sofia", "Europe/Stockholm", "Europe/Tallinn", "Europe/Tirane", "Europe/Vienna", "Europe/Vilnius", "Europe/Warsaw", "Europe/Zurich",
+            "Indian/Antananarivo", "Indian/Chagos", "Indian/Christmas", "Indian/Cocos", "Indian/Comoro", "Indian/Kerguelen", "Indian/Mahe", "Indian/Maldives", "Indian/Mauritius", "Indian/Mayotte", "Indian/Reunion",
+            "Pacific/Apia", "Pacific/Auckland", "Pacific/Chatham", "Pacific/Easter", "Pacific/Efate", "Pacific/Fiji", "Pacific/Funafuti", "Pacific/Galapagos", "Pacific/Gambier", "Pacific/Guadalcanal", "Pacific/Guam", "Pacific/Honolulu", "Pacific/Kiritimati", "Pacific/Kosrae", "Pacific/Majuro", "Pacific/Marquesas", "Pacific/Nauru", "Pacific/Niue", "Pacific/Norfolk", "Pacific/Noumea", "Pacific/Pago_Pago", "Pacific/Palau", "Pacific/Pitcairn", "Pacific/Port_Moresby", "Pacific/Rarotonga", "Pacific/Tahiti", "Pacific/Tarawa", "Pacific/Tongatapu",
+            "UTC"
+        ];
+
+
+        // --- Utility Functions ---
+        function showMessage(text, type = 'info', duration = 2500) { 
+            messageText.textContent = text;
+            messageBoxAlert.className = 'alert alert-sm sm:alert-md py-2 px-3'; 
+            if (type === 'success') messageBoxAlert.classList.add('alert-success');
+            else if (type === 'error') messageBoxAlert.classList.add('alert-error');
+            else messageBoxAlert.classList.add('alert-info');
+            
+            messageBoxContainer.classList.add('show');
+            clearTimeout(messageTimeout);
+            messageTimeout = setTimeout(() => messageBoxContainer.classList.remove('show'), duration);
+        }
+
+        function getHourInTimezone(dateObject, timeZone) {
+            try {
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZone: timeZone,
+                    hour: 'numeric', 
+                    hourCycle: 'h23' 
+                });
+                const parts = formatter.formatToParts(dateObject);
+                const hourPart = parts.find(part => part.type === 'hour');
+                return hourPart ? parseInt(hourPart.value) : -1; 
+            } catch (e) {
+                console.error("Error getting hour for timezone:", timeZone, e);
+                return -1; 
+            }
+        }
+
+        function getFormattedDateTime(date, timeZone) {
+            try {
+                const time = date.toLocaleTimeString('en-US', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false });
+                const day = date.toLocaleDateString('en-US', { timeZone, weekday: 'short' });
+                const fullDate = date.toLocaleDateString('en-GB', { timeZone, day: '2-digit', month: '2-digit', year: 'numeric' });
+                return { time, date: `${day}, ${fullDate}` };
+            } catch (e) { return { time: "Error", date: "Invalid TZ" }; }
+        }
+        
+        function getGMTOffset(timeZone) {
+             try {
+                const now = new Date();
+                const formatter = new Intl.DateTimeFormat('en-US', { timeZone, timeZoneName: 'longOffset' });
+                const parts = formatter.formatToParts(now);
+                const gmtOffsetPart = parts.find(part => part.type === 'timeZoneName');
+                if (gmtOffsetPart && gmtOffsetPart.value) return gmtOffsetPart.value; 
+                
+                const dateInTZ = new Date(now.toLocaleString('en-US', {timeZone}));
+                if (isNaN(dateInTZ.getTime())) return "N/A";
+                const offsetMinutes = -dateInTZ.getTimezoneOffset();
+                const sign = offsetMinutes >= 0 ? '+' : '-';
+                const absOffsetMinutes = Math.abs(offsetMinutes);
+                const hours = Math.floor(absOffsetMinutes / 60);
+                const minutes = absOffsetMinutes % 60;
+                return `GMT${sign}${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+            } catch (e) { return "N/A"; }
+        }
+
+        // --- Core Logic ---
+        function renderClocks() {
+            clocksContainer.innerHTML = '';
+            const baseDate = new Date(Date.now() + timeOffsetHours * 60 * 60 * 1000);
+
+            displayedTimezones.forEach((tzData, index) => {
+                const { time, date } = getFormattedDateTime(baseDate, tzData.timezone);
+                const gmtOffset = getGMTOffset(tzData.timezone);
+
+                const clockCard = document.createElement('div');
+                // Base classes for all cards
+                let cardClasses = 'card clock-card-custom shadow-md hover:shadow-lg';
+                
+                if (!tzData.isLocal) { 
+                    const hour = getHourInTimezone(baseDate, tzData.timezone);
+                    if (hour >= WORK_HOUR_START && hour < WORK_HOUR_END) {
+                        // Apply accent background and ensure text contrasts
+                        cardClasses += ' bg-accent text-accent-content'; 
+                    } else {
+                        // Default background for non-working hours
+                        cardClasses += ' bg-base-100'; 
+                    }
+                } else {
+                    // Default background for local time card
+                    cardClasses += ' bg-base-100'; 
+                }
+                clockCard.className = cardClasses;
+                
+                clockCard.innerHTML = `
+                    <div class="card-body p-3 sm:p-4"> 
+                        <div class="flex justify-between items-start mb-1">
+                            <div>
+                                <h3 class="city-name">${tzData.city}</h3>
+                                <p class="timezone-info">${tzData.timezone.replace(/_/g, ' ')} <br class="sm:hidden">(${gmtOffset})</p> 
+                            </div>
+                            ${!tzData.isLocal ? `<button class="btn btn-xs btn-circle btn-ghost text-error remove-btn" data-index="${index}" title="Remove clock">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                            </button>` : ''}
+                        </div>
+                        <div class="text-right mt-auto pt-1">
+                            <div class="time">${time}</div>
+                            <div class="date mt-0.5">${date}</div>
+                        </div>
+                    </div>
+                `;
+                clocksContainer.appendChild(clockCard);
+
+                if (!tzData.isLocal) {
+                    clockCard.querySelector('.remove-btn').addEventListener('click', (e) => {
+                        const button = e.target.closest('.remove-btn');
+                        if (button) removeTimezone(parseInt(button.dataset.index));
+                    });
+                }
+            });
+        }
+
+        function updateClocks() {
+            if (intervalId) clearInterval(intervalId);
+            renderClocks();
+            intervalId = setInterval(renderClocks, 1000);
+        }
+
+        function saveTimezonesToLocalStorage() {
+            localStorage.setItem('transcelestialClocks', JSON.stringify(displayedTimezones));
+        }
+
+        function loadTimezonesFromLocalStorage() {
+            const saved = localStorage.getItem('transcelestialClocks');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if(Array.isArray(parsed) && parsed.every(item => typeof item === 'object' && item.city && item.timezone)) { 
+                        displayedTimezones = parsed;
+                    } else {
+                        localStorage.removeItem('transcelestialClocks'); 
+                    }
+                } catch (e) { 
+                    console.error("Error parsing timezones from localStorage:", e);
+                    localStorage.removeItem('transcelestialClocks'); 
+                }
+            }
+        }
+
+        function populateTimezoneSelector() {
+            const sortedTimezones = [...allTimezones].sort((a, b) => a.replace(/_/g, ' ').localeCompare(b.replace(/_/g, ' ')));
+            timezoneSelect.innerHTML = ''; 
+            sortedTimezones.forEach(tz => {
+                const option = document.createElement('option');
+                option.value = tz;
+                option.textContent = tz.replace(/_/g, ' ');
+                timezoneSelect.appendChild(option);
+            });
+            const defaultTZ = "America/New_York";
+            timezoneSelect.value = sortedTimezones.includes(defaultTZ) ? defaultTZ : (sortedTimezones[0] || '');
+        }
+
+        function addTimezoneHandler() { 
+            const selectedTz = timezoneSelect.value;
+            let cityName = customCityNameInput.value.trim();
+            if (!selectedTz) { showMessage("Please select a timezone.", 'error'); return; }
+            if (!cityName) cityName = selectedTz.substring(selectedTz.lastIndexOf('/') + 1).replace(/_/g, ' ');
+            if (displayedTimezones.some(tz => tz.timezone === selectedTz)) {
+                showMessage(`${cityName} (${selectedTz.replace(/_/g, ' ')}) is already displayed.`, 'info'); return;
+            }
+            try { new Date().toLocaleTimeString('en-US', { timeZone: selectedTz }); } 
+            catch (e) { showMessage(`Invalid timezone: ${selectedTz.replace(/_/g, ' ')}.`, 'error'); return; }
+
+            displayedTimezones.push({ city: cityName, timezone: selectedTz });
+            customCityNameInput.value = ''; 
+            if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                document.activeElement.blur(); 
+            }
+            saveTimezonesToLocalStorage();
+            updateClocks();
+            showMessage(`${cityName} clock added.`, 'success');
+        }
+
+        function removeTimezone(index) {
+            if (index >= 0 && index < displayedTimezones.length && !displayedTimezones[index].isLocal) {
+                const removed = displayedTimezones.splice(index, 1);
+                saveTimezonesToLocalStorage();
+                updateClocks();
+                showMessage(`${removed[0].city} clock removed.`, 'info');
+            }
+        }
+
+        // --- Event Listeners ---
+        timeTravelSlider.addEventListener('input', (e) => {
+            timeOffsetHours = parseFloat(e.target.value);
+            timeTravelValueDisplay.textContent = `${timeOffsetHours} hours`;
+            updateClocks();
+        });
+        resetTimeBtn.addEventListener('click', () => {
+            timeOffsetHours = 0;
+            timeTravelSlider.value = 0;
+            timeTravelValueDisplay.textContent = `0 hours`;
+            updateClocks();
+            showMessage("Time reset to current.", 'info');
+        });
+        addTimezoneBtn.addEventListener('click', addTimezoneHandler);
+
+        // --- Initialization ---
+        function init() {
+            applyTheme(localStorage.getItem('transcelestialTheme') || lightTheme); 
+            loadTimezonesFromLocalStorage();
+            populateTimezoneSelector(); 
+            updateClocks();
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
