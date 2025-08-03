@@ -20,8 +20,9 @@ A simple, elegant, and customizable web-based clock wall designed to help distri
 1.  **Open the file**: Simply open the `index.html` file in any modern web browser.
 2.  **Add Clocks**: Click the **+** button in the top-right corner to open the "Add New Clock" dialog. Select a timezone and optionally give it a custom name.
 3.  **Remove Clocks**: Click the **×** button on any clock card (except for your local time) to remove it from the dashboard.
-4.  **Toggle Theme**: Use the sun/moon icon in the top-right to switch between light and dark modes.
-5.  **Time Travel**: Use the slider at the bottom of the page to scrub through time. Click the "Set to Now" button to reset all clocks to the current time.
+4. **Changes Saved Locally**: The browser persists the changes in localstorage and remembers
+5.  **Toggle Theme**: Use the sun/moon icon in the top-right to switch between light and dark modes.
+6.  **Time Travel**: Use the slider at the bottom of the page to scrub through time. Click the "Set to Now" button to reset all clocks to the current time.
 
 ## Technologies Used
 
