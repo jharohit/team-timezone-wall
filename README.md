@@ -2,6 +2,8 @@
 
 A simple, elegant, and customizable web-based clock wall designed to help distributed teams keep track of different timezones at a glance.
 
+![alt text](screenshot.png)
+
 ## Features
 
 *   **Multiple Clocks**: Display clocks for various timezones simultaneously.
