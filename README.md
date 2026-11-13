@@ -15,7 +15,8 @@ A fast, zero-dependency, single-file web clock wall designed to help distributed
 * **Time Travel & Quick Copy**: Scrub `-24h` to `+24h` (or drag any card's bottom 24h strip) to preview meeting times across the team, and click any card time or **Copy Times** to copy a formatted snapshot.
 * **Fast City Search (`⌘K` / `Ctrl+K`)**: Search across global cities, country flags, timezone abbreviations (`IST`, `PST`, `SGT`, `NYC`), and IANA zones with live time previews and optional custom labels.
 * **Flexible Organization & Preferences**: Toggle `24h` / `12h`, show/hide seconds, customize global or per-card working hours, drag-and-drop reorder cards, sort by `Manual`, `West → East`, or `Online first`, and switch between Light and Dark themes.
-* **Viewport-Fitted & Performant**: Dynamically fits all dashboard elements within the viewport across desktop and mobile without overflow, caches `Intl.DateTimeFormat` instances, updates DOM nodes in place, and aligns live ticks to minute boundaries when seconds are hidden.
+* **Refined UI & Micro-Interactions**: Built with a clean `shadcn/ui`-inspired Zinc token system (hairline borders, command-palette search dialog, sliding `24h`/`12h` tabs, range-filled slider, spring switches, and Sonner-style toasts) paired with GPU-composited `transitions.dev` motion (digit pop-ins, origin-aware popovers, theme icon swaps, subtle 3D card tilt, error shakes, and `prefers-reduced-motion` support).
+* **Viewport-Fitted & Performant**: Adapts grid rows and columns across wide, tall, and mobile viewports with zero overflow, caches `Intl.DateTimeFormat` instances, updates DOM nodes in place, and aligns live ticks to minute boundaries when seconds are hidden.
 * **Persistent State**: Clocks, theme, layout, and preferences are automatically saved in `localStorage`.
 
 ## How to Use
