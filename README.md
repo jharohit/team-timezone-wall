@@ -2,7 +2,7 @@
 
 A fast, zero-dependency, single-file web clock wall designed to help distributed teams track timezones, working hours, daylight, and meeting overlap at a glance.
 
-![Team Timezone Wall](screenshots/main.png)
+![Team Timezone Wall](screenshots/dark-mode.png)
 
 ## Features
 
@@ -34,9 +34,9 @@ A fast, zero-dependency, single-file web clock wall designed to help distributed
 
 ## Gallery
 
-| Dark Mode | Sky Horizon |
+| Light Mode | Sky Horizon |
 | :---: | :---: |
-| ![Dark Mode](screenshots/dark-mode.png) | ![Sky Horizon](screenshots/horizon.png) |
+| ![Light Mode](screenshots/light-mode.png) | ![Sky Horizon](screenshots/horizon.png) |
 
 | Word Clock | Nixie Tubes |
 | :---: | :---: |
