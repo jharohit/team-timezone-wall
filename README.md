@@ -2,29 +2,7 @@
 
 A fast, zero-dependency, single-file web clock wall designed to help distributed teams track timezones, working hours, daylight, and meeting overlap at a glance.
 
-![Team Timezone Wall](screenshot.png)
-
-## Gallery
-
-| Dark Mode | Sky Horizon |
-| :---: | :---: |
-| ![Dark Mode](screenshots/dark-mode.png) | ![Sky Horizon](screenshots/horizon.png) |
-
-| Word Clock | Nixie Tubes |
-| :---: | :---: |
-| ![Word Clock](screenshots/wordclock.png) | ![Nixie Tubes](screenshots/nixie.png) |
-
-| Analog Dial | Split-Flap |
-| :---: | :---: |
-| ![Analog Dial](screenshots/analog.png) | ![Split-Flap](screenshots/flip.png) |
-
-| Sonar Radar | Bauhaus Art |
-| :---: | :---: |
-| ![Sonar Radar](screenshots/radar.png) | ![Bauhaus Art](screenshots/bauhaus.png) |
-
-| Liquid Tide | Binary LED |
-| :---: | :---: |
-| ![Liquid Tide](screenshots/wave.png) | ![Binary LED](screenshots/binary.png) |
+![Team Timezone Wall](screenshots/main.png)
 
 ## Features
 
@@ -53,3 +31,25 @@ A fast, zero-dependency, single-file web clock wall designed to help distributed
 * **HTML5** & **Canvas 2D / Inline SVG**
 * **Modern CSS3** (CSS Grid, Custom Properties, `tabular-nums` typography)
 * **Vanilla JavaScript** (`Intl.DateTimeFormat`, `localStorage`, `requestAnimationFrame`) with zero external libraries or frameworks.
+
+## Gallery
+
+| Dark Mode | Sky Horizon |
+| :---: | :---: |
+| ![Dark Mode](screenshots/dark-mode.png) | ![Sky Horizon](screenshots/horizon.png) |
+
+| Word Clock | Nixie Tubes |
+| :---: | :---: |
+| ![Word Clock](screenshots/wordclock.png) | ![Nixie Tubes](screenshots/nixie.png) |
+
+| Analog Dial | Split-Flap |
+| :---: | :---: |
+| ![Analog Dial](screenshots/analog.png) | ![Split-Flap](screenshots/flip.png) |
+
+| Sonar Radar | Bauhaus Art |
+| :---: | :---: |
+| ![Sonar Radar](screenshots/radar.png) | ![Bauhaus Art](screenshots/bauhaus.png) |
+
+| Liquid Tide | Binary LED |
+| :---: | :---: |
+| ![Liquid Tide](screenshots/wave.png) | ![Binary LED](screenshots/binary.png) |
